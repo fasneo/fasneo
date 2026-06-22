@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="fasneo_green">#1B7A2E</color>
+    <color name="fasneo_orange">#F7941D</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="status_bar">#15601F</color>
+</resources>
