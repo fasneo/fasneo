@@ -103,7 +103,14 @@ class MainActivity : AppCompatActivity() {
                 error: android.webkit.WebResourceError?
             ) {
                 super.onReceivedError(view, request, error)
-                if (request?.isForMainFrame == true) {
+                // Sirf real network errors pe "no internet" dikhao,
+                // WhatsApp/external redirect ki wajah se aane wale fake errors ignore karo
+                val errorCode = error?.errorCode
+                val isNetworkError = errorCode == android.webkit.WebViewClient.ERROR_HOST_LOOKUP ||
+                        errorCode == android.webkit.WebViewClient.ERROR_CONNECT ||
+                        errorCode == android.webkit.WebViewClient.ERROR_TIMEOUT
+
+                if (request?.isForMainFrame == true && isNetworkError && !isNetworkAvailable()) {
                     showNoInternetView()
                 }
             }
