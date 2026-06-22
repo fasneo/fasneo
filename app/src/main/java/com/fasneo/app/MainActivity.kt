@@ -67,25 +67,34 @@ class MainActivity : AppCompatActivity() {
         }
 
         webView.webViewClient = object : WebViewClient() {
-            override fun shouldOverrideUrlLoading(
+           override fun shouldOverrideUrlLoading(
                 view: WebView?,
                 request: WebResourceRequest?
             ): Boolean {
                 val url = request?.url?.toString() ?: return false
-                // Keep navigation inside the app if it's the same site
-                return if (url.contains("fasneo.com")) {
-                    false
-                } else {
-                    // Open external links (e.g. payment gateways, WhatsApp, maps) outside the app
-                    try {
-                        startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
-                        true
-                    } catch (e: Exception) {
-                        false
-                    }
+
+                // Normal http/https links to our own site load inside the app
+                if ((url.startsWith("http://") || url.startsWith("https://")) && url.contains("fasneo.com")) {
+                    return false
+                }
+
+                // Everything else (whatsapp://, tel:, mailto:, upi:, other http(s) links, etc.)
+                // gets handed off to the appropriate external app
+                return try {
+                    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(intent)
+                    true
+                } catch (e: Exception) {
+                    // No app installed to handle this link (e.g. WhatsApp not installed)
+                    android.widget.Toast.makeText(
+                        this@MainActivity,
+                        "No app found to open this link",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                    true
                 }
             }
-
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 binding.swipeRefreshLayout.isRefreshing = false
